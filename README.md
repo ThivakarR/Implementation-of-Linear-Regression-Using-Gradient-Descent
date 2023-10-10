@@ -1,113 +1,167 @@
-# Implementation-of-Linear-Regression-Using-Gradient-Descent
+# Implementation-of-Logistic-Regression-Using-Gradient-Descent
 
 ## AIM:
-To write a program to predict the profit of a city using the linear regression model with gradient descent.
+To write a program to implement the the Logistic Regression Using Gradient Descent.
 
 ## Equipments Required:
 1. Hardware – PCs
 2. Anaconda – Python 3.7 Installation / Jupyter notebook
 
 ## Algorithm
-1. Startv the program.
-2. import numpy as np.
-3. Give the header to the data.
-4. Find the profit of population.
-5. Plot the required graph for both for Gradient Descent Graph and Prediction Graph.
-6. End the program.
+#### Step 1:
+Use the standard libraries in python for finding linear regression.
 
+#### Step 2:
+Set variables for assigning dataset values.
+
+#### Step 3:
+Import linear regression from sklearn.
+
+#### Step 4:
+Predict the values of array.
+
+#### Step 5:
+Calculate the accuracy, confusion and classification report by importing the required modules from sklearn.
+
+#### Step 6.
+Obtain the graph.
 ## Program:
 ```
-/*
-Program to implement the linear regression using gradient descent.
+Program to implement the the Logistic Regression Using Gradient Descent.
 Developed by: R.THIVAKAR
-RegisterNumber: 212222240109
-
+RegisterNumber:  212222240109
+```
+```python
 import numpy as np
 import matplotlib.pyplot as plt
-import pandas as pd
+from scipy import optimize
 
+data = np.loadtxt("ex2data1.txt", delimiter = ",")
+X = data[:, [0, 1]]
+y = data[:, 2]
 
-data=pd.read_csv("/content/ex1.txt",header=None)
+X[:5]
 
-plt.scatter(data[0],data[1])
-plt.xticks(np.arange(5,30,step=5))
-plt.yticks(np.arange(-5,30,step=5))
-plt.xlabel("Population of city (10,000s)")
-plt.ylabel("Profit ($10,000")
-plt.title("Profit Predication")
+y[:5]
 
-def computeCost(x,y,theta):
-  m=len(y)
-  h=x.dot(theta)
-  square_err=(h-y)**2
-  return 1/(2*m)*np.sum(square_err)
-  
-data_n=data.values
-m=data_n[:,0].size
-x=np.append(np.ones((m,1)),data_n[:,0].reshape(m,1),axis=1)
-y=data_n[:,1].reshape(m,1)
-theta=np.zeros((2,1))
-computeCost(x,y,theta)
+plt.figure()
+plt.scatter(X[y == 1][:, 0],  X[y == 1][:, 1], label = "Admitted",color='red')
+plt.scatter(X[y == 0][:, 0],  X[y == 0][:, 1], label = "Not Admitted",color='green')
+plt.xlabel("Exam 1 Score")
+plt.ylabel("Exam 2 Score")
+plt.legend()
+plt.show()
 
-def gradientDescent(x,y,theta,alpha,num_iters):
-  m=len(y)
-  J_history=[]
-  for i in range(num_iters):
-    predictions=x.dot(theta)
-    error=np.dot(x.transpose(),(predictions-y))
-    descent=alpha*1/m*error
-    theta-=descent
-    J_history.append(computeCost(x,y,theta))
-  return theta,J_history
-  
-theta,J_history = gradientDescent(x,y,theta,0.01,1500)
-print("h(x) ="+str(round(theta[0,0],2))+" + "+str(round(theta[1,0],2))+"x1")
+def sigmoid(z):
+    return 1 / (1 + np.exp(-z))
 
-plt.plot(J_history)
-plt.xlabel("Iteration")
-plt.ylabel("$J(\Theta)$")
-plt.title("Cost function using Gradient Descent")
+plt.plot()
+X_plot = np.linspace(-10, 10 , 100)
+plt.plot(X_plot, sigmoid(X_plot),color='red')
+plt.show()
 
+def costFunction(theta, X, y):
+    h = sigmoid(np.dot(X, theta))
+    J = -(np.dot(y, np.log(h)) + np.dot(1 - y, np.log(1 - h))) / X.shape[0]
+    grad = np.dot(X.T, h - y) / X.shape[0]
+    return J, grad
 
-plt.scatter(data[0],data[1])
-x_value=[x for x in range(25)]
-y_value=[y*theta[1]+theta[0] for y in x_value]
-plt.plot(x_value,y_value,color='r')
-plt.xticks(np.arange(5,30,step=5))
-plt.yticks(np.arange(-5,30,step=5))
-plt.xlabel("Population of City (10,000s)")
-plt.ylabel("Profit ($10,000")
-plt.title("Profit Prediction")
+X_train = np.hstack((np.ones((X.shape[0], 1)), X))
+theta = np.array([-24, 0.2, 0.2])
+J, grad = costFunction(theta, X_train, y)
+print(J)
+print(grad)
 
-def predict(x,theta):
-  predictions= np.dot(theta.transpose(),x)
-  return predictions[0]
-  
-predict1=predict(np.array([1,3.5]),theta)*1000
-print("For population = 35,000, we predict a profit of $"+str(round(predict1,0)))
+def cost(theta, X, y):
+    h = sigmoid(np.dot(X, theta))
+    J = -(np.dot(y, np.log(h)) + np.dot(1 - y, np.log(1 - h))) / X.shape[0]
+    return J
 
-predict2=predict(np.array([1,7]),theta)*1000
-print("For population = 70,000, we predict a profit of $"+str(round(predict2,0)))
+def gradient(theta, X, y):
+    h = sigmoid(np.dot(X, theta))
+    grad = np.dot(X.T, h - y) / X.shape[0]
+    return grad
 
-*/
+X_train = np.hstack((np.ones((X.shape[0], 1)), X))
+theta = np.array([0, 0, 0])
+res = optimize.minimize(fun = cost, x0 = theta, args = (X_train, y), method = "Newton-CG", jac = gradient)
+print(res.fun)
+print(res.x)
+
+def plotDecisionBoundary(theta,X,y):
+    x_min,x_max=X[:,0].min()-1,X[:,0].max()+1
+    y_min,y_max=X[:,1].min()-1,X[:,1].max()+1
+    xx,yy=np.meshgrid(np.arange(x_min,x_max,0.1),np.arange(y_min,y_max,0.1))
+    X_plot=np.c_[xx.ravel(),yy.ravel()]
+    X_plot=np.hstack((np.ones((X_plot.shape[0],1)),X_plot))
+    y_plot=np.dot(X_plot,theta).reshape(xx.shape)
+    plt.figure()
+    plt.scatter(X[y == 1][:, 0], X[y == 1][:, 1], label="Admitted",color='red')
+    plt.scatter(X[y == 0][:, 0], X[y == 0][:, 1], label="Not admitted",color='green')
+    plt.contour(xx, yy, y_plot, levels=[0])
+    plt.xlabel("Exam 1 score")
+    plt.ylabel("Exam 2 score")
+    plt.legend()
+    plt.show()
+plotDecisionBoundary(res.x, X, y)
+
+def predict(theta, X):
+    X_train = np.hstack((np.ones((X.shape[0], 1)), X))
+    prob=sigmoid(np.dot(X_train,theta))
+    return (prob>=0.5).astype(int)
+
+np.mean(predict(res.x,X)==y)
 ```
-
 ## Output:
-![image](https://user-images.githubusercontent.com/119389139/230386308-e04bfb79-b231-453b-953e-e45512f79148.png)
+#### Array value of X:
 
-![image](https://user-images.githubusercontent.com/119389139/230386410-d4ccb116-c4d8-4c4b-b348-f5ccba787338.png)
+![Screenshot from 2023-10-07 09-06-01](https://github.com/Gchethankumar/-Implementation-of-Logistic-Regression-Using-Gradient-Descent/assets/118348224/19a6306d-bc01-42a0-a7de-6eabab6b0c34)
 
-![image](https://user-images.githubusercontent.com/119389139/230386510-63de0d84-f31d-4a1c-a9fd-4972f86cf64e.png)
+#### Array value of Y:
 
-![image](https://user-images.githubusercontent.com/119389139/230386833-3d102068-46b6-479f-83c7-cb87f732526e.png)
-
-![image](https://user-images.githubusercontent.com/119389139/230389941-e78316c2-0ef7-40aa-8a98-036822924a2b.png)
-
-![image](https://user-images.githubusercontent.com/119389139/230390024-44c07657-bcc7-42d7-a710-b70cc6d5917b.png)
-
-![image](https://user-images.githubusercontent.com/119389139/230390104-41a9a384-10fe-4380-ba90-3d133ea40167.png)
+![Screenshot from 2023-10-07 09-06-08](https://github.com/Gchethankumar/-Implementation-of-Logistic-Regression-Using-Gradient-Descent/assets/118348224/e63b1338-7482-4ef8-bb8f-9dd4607e4043)
 
 
+#### Exam 1- Score Graph:
+
+![Screenshot from 2023-10-07 09-06-20](https://github.com/Gchethankumar/-Implementation-of-Logistic-Regression-Using-Gradient-Descent/assets/118348224/f63d2b28-11b5-4e84-9f2c-bd6e50cb4a56)
+
+
+#### Sigmoid function graph:
+
+![Screenshot from 2023-10-07 09-06-27](https://github.com/Gchethankumar/-Implementation-of-Logistic-Regression-Using-Gradient-Descent/assets/118348224/39ed6837-31d3-4558-a39e-b1e4f958481a)
+
+
+#### X_Train grad value:
+
+![Screenshot from 2023-10-07 09-06-41](https://github.com/Gchethankumar/-Implementation-of-Logistic-Regression-Using-Gradient-Descent/assets/118348224/2ed3471e-3c1a-4e45-a948-fe6ff069798c)
+
+
+#### Y_Train gradm value:
+
+![Screenshot from 2023-10-07 09-06-49](https://github.com/Gchethankumar/-Implementation-of-Logistic-Regression-Using-Gradient-Descent/assets/118348224/7b4015ec-4ac5-461e-b612-95d6d97fe954)
+
+
+#### Print res of X:
+
+![Screenshot from 2023-10-07 09-06-57](https://github.com/Gchethankumar/-Implementation-of-Logistic-Regression-Using-Gradient-Descent/assets/118348224/c66094d1-0a3a-4f66-a7ad-581cbab9a527)
+
+
+#### Decision Boundary- Graph for Exam Score:
+
+![Screenshot from 2023-10-07 09-07-06](https://github.com/Gchethankumar/-Implementation-of-Logistic-Regression-Using-Gradient-Descent/assets/118348224/1503ee01-7567-4f41-b9f8-a4dd69b50a95)
+
+
+#### Probability value:
+
+![Screenshot from 2023-10-07 09-07-15](https://github.com/Gchethankumar/-Implementation-of-Logistic-Regression-Using-Gradient-Descent/assets/118348224/4c971759-c41d-4998-80c6-f9eff75c1c9b)
+
+
+#### Prediction value of mean:
+
+![Screenshot from 2023-10-07 09-07-22](https://github.com/Gchethankumar/-Implementation-of-Logistic-Regression-Using-Gradient-Descent/assets/118348224/eb30b702-246d-4d97-8d6f-4d4fddf1d96c)
 
 ## Result:
-Thus the program to implement the linear regression using gradient descent is written and verified using python programming.
+Thus the program to implement the the Logistic Regression Using Gradient Descent is written and verified using python programming.
+
+
